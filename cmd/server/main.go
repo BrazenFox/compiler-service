@@ -27,9 +27,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s := server.New(config)
+	srv := new(server.Server)
 
-	if err := s.Start(); err != nil {
+	if err := srv.Run("8080", ); err != nil {
 		log.Fatal(err)
 	}
 }

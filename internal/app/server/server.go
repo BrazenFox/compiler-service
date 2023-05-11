@@ -1,61 +1,35 @@
 package server
 
 import (
-	"io"
+	"context"
 	"net/http"
-
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
+	"time"
 )
 
 type Server struct {
-	config *Config
-	logger *logrus.Logger
-	router *mux.Router
+	httpServer *http.Server
+	
 }
 
-func New(config *Config) *Server {
-	return &Server{
-		config: config,
-		logger: logrus.New(),
-		router: mux.NewRouter(),
+//func New(config *Config) *Server {
+//	return &Server{
+//		config: config,
+//		logger: logrus.New(),
+//	}
+//}
+
+func (s *Server) Run(port string, handler http.Handler) error {
+	s.httpServer = &http.Server{
+		Addr: ":" + port,
+		Handler: handler,
+		MaxHeaderBytes: 1 << 20,
+		ReadTimeout: 10 * time.Second,
+		WriteTimeout: 10 *time.Second,
 	}
+
+	return s.httpServer.ListenAndServe()
 }
 
-func (s *Server) Start() error {
-	if err := s.configureLogger(); err != nil {
-		return err
-	}
-
-	s.configureRuoter()
-
-	s.logger.Info("starting server")
-
-	return http.ListenAndServe(s.config.BindAddr, s.router)
-}
-
-func (s *Server) configureLogger() error {
-	level, err := logrus.ParseLevel(s.config.LogLevel)
-
-	if err != nil {
-		return err
-	}
-
-	s.logger.SetLevel(level)
-
-	return nil
-}
-
-func (s *Server) configureRuoter(){
-	s.router.HandleFunc("/hello", s.handleHello())
-}
-
-func (s *Server) handleHello() http.HandlerFunc{
-	type request struct{
-		name string
-	}
-
-	return func (w http.ResponseWriter, r *http.Request)  {
-		io.WriteString(w, "Hello")
-	}
+func (s *Server) Shutdown(ctx context.Context) error {
+	return s.httpServer.Shutdown(ctx)
 }
