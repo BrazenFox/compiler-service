@@ -1,35 +1,30 @@
 package main
 
 import (
-	"flag"
 	"log"
 
+	"github.com/BrazenFox/compiler-service/internal/app/handler"
 	"github.com/BrazenFox/compiler-service/internal/app/server"
-	"github.com/BurntSushi/toml"
+	"github.com/BrazenFox/compiler-service/internal/app/service"
+	"github.com/spf13/viper"
 )
-
-var (
-	configPath string
-)
-
-func init() {
-	flag.StringVar(&configPath, "config-path", "configs/server.toml", "path to config file")
-}
 
 func main() {
-
-	flag.Parse()
-
-	config := server.NewConfig()
-	_, err := toml.DecodeFile(configPath, config)
-
-	if err != nil {
-		log.Fatal(err)
+	if err := initConfig(); err != nil {
+		log.Fatalf("error initializing configs: %s", err.Error())
 	}
+
+	services := service.NewService()
+	handlers := handler.NewHandler(services)
 
 	srv := new(server.Server)
-
-	if err := srv.Run("8080", ); err != nil {
-		log.Fatal(err)
+	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+		log.Fatalf("err: %s", err.Error())
 	}
+}
+
+func initConfig() error {
+	viper.AddConfigPath("configs")
+	viper.SetConfigName("config")
+	return viper.ReadInConfig()
 }
