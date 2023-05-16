@@ -1,17 +1,17 @@
 package main
 
 import (
-	"log"
-
 	"github.com/BrazenFox/compiler-service/internal/app/handler"
 	"github.com/BrazenFox/compiler-service/internal/app/server"
 	"github.com/BrazenFox/compiler-service/internal/app/service"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 func main() {
+	//logrus.SetFormatter(new(logrus.JSONFormatter))
 	if err := initConfig(); err != nil {
-		log.Fatalf("error initializing configs: %s", err.Error())
+		logrus.Fatalf("error initializing configs: %s", err.Error())
 	}
 
 	services := service.NewService()
@@ -19,7 +19,7 @@ func main() {
 
 	srv := new(server.Server)
 	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
-		log.Fatalf("err: %s", err.Error())
+		logrus.Fatalf("err: %s", err.Error())
 	}
 }
 
