@@ -2,17 +2,17 @@ package service
 
 import "github.com/BrazenFox/compiler-service/pkg/entity"
 
-type ProgramRunner interface {
-	RunProgram(program entity.Program) (string, error)
+type ProgramHandler interface {
+	HandleProgram(program entity.Program) (string, error)
 }
 
 type Service struct {
-	ProgramRunner
+	ProgramHandler
 }
 
 func NewService() *Service {
 	return &Service{
-		ProgramRunner: NewRunProgramService(),
+		ProgramHandler: NewProgramHandlerService(),
 	}
 
 }

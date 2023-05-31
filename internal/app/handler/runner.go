@@ -14,7 +14,7 @@ func (h *Handler) run(c *gin.Context) {
 		return
 	}
 	logrus.Info("input", input)
-	result, err := h.services.ProgramRunner.RunProgram(input)
+	result, err := h.services.ProgramHandler.HandleProgram(input)
 	if err != nil {
 		newErrorResponse(c, http.StatusInternalServerError, err.Error())
 		return
