@@ -35,7 +35,10 @@ func (s *ProgramHandlerService) HandleProgram(program entity.Program) (string, e
 		logrus.Error("this programm language doesn't supported")
 		return "", errors.New("this programm language doesn't supported")
 	}
-	CreateFolders(runner.GetPath(), runner.GetFileName(), runner.GetCode())
+
+	if err := CreateFolders(runner.GetPath(), runner.GetFileName(), runner.GetCode()); err != nil {
+		return "", err
+	}
 
 	output, err := runner.RunProgram()
 
@@ -44,19 +47,21 @@ func (s *ProgramHandlerService) HandleProgram(program entity.Program) (string, e
 		return "", err
 	}
 
+	DeleteFolders("program/")
+
 	logrus.Info("Command Successfully Executed")
 
 	return output, nil
 }
 
-func CreateFolders(path string, filename string, code string) (string, error) {
+func CreateFolders(path string, filename string, code string) error {
 	if err := os.MkdirAll(path, os.ModePerm); err != nil {
 		logrus.Error("filepath can't be created")
 	}
 	file, err := os.Create(path + "/" + filename)
 	if err != nil {
 		logrus.Error("Unable to open file", err)
-		return "", err
+		return err
 	}
 
 	logrus.Info("file created", file.Name(), file)
@@ -64,15 +69,19 @@ func CreateFolders(path string, filename string, code string) (string, error) {
 	_, err = file.WriteString(code)
 	if err != nil {
 		logrus.Error("Unable to write data", err)
-		return "", err
+		return err
 	}
-	file.Close()
 
-	return "", errors.New("")
+	if err := file.Close(); err != nil {
+		logrus.Error("filepath can't be closed")
+	}
+	return errors.New("")
 }
 
-func DeleteFolders() (str string) {
-	return str
+func DeleteFolders(path string) {
+	if err := os.RemoveAll(path); err != nil {
+		logrus.Error("filepath can't be created")
+	}
 }
 
 /*{
