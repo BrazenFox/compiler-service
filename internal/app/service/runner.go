@@ -75,7 +75,7 @@ func CreateFolders(path string, filename string, code string) error {
 	if err := file.Close(); err != nil {
 		logrus.Error("filepath can't be closed")
 	}
-	return errors.New("")
+	return nil
 }
 
 func DeleteFolders(path string) {
